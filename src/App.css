@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+:root { --bg: #09090b; --bg2: #18181b; --bg3: #27272a; --border: #3f3f46; --text: #fafafa; --muted: #71717a; }
+[data-theme="light"] { --bg: #ffffff; --bg2: #f4f4f5; --bg3: #e4e4e7; --border: #d4d4d8; --text: #09090b; --muted: #71717a; }
+[data-theme="oled"] { --bg: #000000; --bg2: #0a0a0a; --bg3: #111111; --border: #222222; --text: #ffffff; --muted: #555555; }
+
+body { background: var(--bg); color: var(--text); font-family: Inter, sans-serif; }
