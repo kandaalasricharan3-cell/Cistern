@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { downloadDir, join } from "@tauri-apps/api/path";
 import "./App.css";
 import ReactMarkdown from "react-markdown";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
@@ -3096,7 +3097,10 @@ function BackupRestore() {
       .then(setDbPath)
       .catch(() => {});
     const date = new Date().toISOString().split("T")[0];
-    setBackupPath(`C:\\Users\\kanda\\Downloads\\cistern_backup_${date}.db`);
+    downloadDir()
+      .then((dir) => join(dir, `cistern_backup_${date}.db`))
+      .then(setBackupPath)
+      .catch(() => {});
   }, []);
 
   const doBackup = async () => {
@@ -3193,9 +3197,15 @@ function ExportData() {
   const [msg, setMsg] = useState("");
   const [exportPath, setExportPath] = useState("");
 
+  const [dlDir, setDlDir] = useState("");
+
+  useEffect(() => {
+    downloadDir().then(setDlDir).catch(() => {});
+  }, []);
+
   const getDefaultPath = (ext: string) => {
     const date = new Date().toISOString().split("T")[0];
-    return `C:\\Users\\kanda\\Downloads\\cistern_${date}.${ext}`;
+    return `${dlDir.replace(/[\\/]+$/, "")}/cistern_${date}.${ext}`;
   };
 
   const doExport = async (format: "csv" | "json") => {
@@ -4269,11 +4279,11 @@ function VaultGate({ onUnlocked }: { onUnlocked: () => void }) {
   const handleCreate = async () => {
     setError(null);
     if (passphrase.length < 10) {
-      setError("Your spell should be at least 10 characters.");
+      setError("Your password should be at least 10 characters.");
       return;
     }
     if (passphrase !== confirmPassphrase) {
-      setError("The two spells don't match.");
+      setError("The two passwords don't match.");
       return;
     }
     setBusy(true);
@@ -4322,7 +4332,7 @@ function VaultGate({ onUnlocked }: { onUnlocked: () => void }) {
   if (state === "loading") {
     return (
       <div className="flex items-center justify-center h-screen" style={gateStyle}>
-        <p className="text-sm" style={{ color: "#8a8270" }}>The vault stirs...</p>
+        <p className="text-sm" style={{ color: "#8a8270" }}>Opening your vault...</p>
       </div>
     );
   }
@@ -4331,9 +4341,9 @@ function VaultGate({ onUnlocked }: { onUnlocked: () => void }) {
     return (
       <div className="flex items-center justify-center h-screen p-6" style={gateStyle}>
         <div className="max-w-md w-full rounded-xl p-8" style={{ background: "#0b0a08", border: "0.5px solid #3a3226" }}>
-          <h1 className="text-center mb-1" style={{ fontSize: 22, color: "#FAC775", fontFamily: "Georgia, 'Times New Roman', serif" }}>Save your ward-key</h1>
+          <h1 className="text-center mb-1" style={{ fontSize: 22, color: "#FAC775", fontFamily: "Georgia, 'Times New Roman', serif" }}>Save your recovery key</h1>
           <p className="text-xs text-center mb-6" style={{ color: "#8a8270" }}>
-            This is the only way back in if you forget your spell. It will not be shown again.
+            This is the only way back in if you forget your password. It will not be shown again.
           </p>
           <div
             className="rounded-lg p-4 mb-4 text-center font-mono tracking-wider"
@@ -4377,13 +4387,13 @@ function VaultGate({ onUnlocked }: { onUnlocked: () => void }) {
           <div style={{ fontSize: 28, color: "#BA7517", marginBottom: 8 }}>🔒</div>
           <p style={{ fontSize: 26, color: "#FAC775", letterSpacing: 0.5, fontFamily: "Georgia, 'Times New Roman', serif" }}>Cistern</p>
           <p className="text-xs mt-1" style={{ color: "#8a8270" }}>
-            {state === "create" ? "A new vault awaits its first word" : "The vault stirs, awaiting its word"}
+            {state === "create" ? "Set up your vault" : "Your vault is sealed. Enter your password."}
           </p>
         </div>
 
         {state === "create" && !showRecoveryInput && (
           <>
-            <label className="block text-xs mb-1" style={{ color: "#8a8270" }}>whisper the spell</label>
+            <label className="block text-xs mb-1" style={{ color: "#8a8270" }}>Enter your password</label>
             <div className="relative mb-3">
               <input
                 type={showPassphrase ? "text" : "password"}
@@ -4397,7 +4407,7 @@ function VaultGate({ onUnlocked }: { onUnlocked: () => void }) {
                 {showPassphrase ? "🙈" : "👁"}
               </button>
             </div>
-            <label className="block text-xs mb-1" style={{ color: "#8a8270" }}>confirm the spell</label>
+            <label className="block text-xs mb-1" style={{ color: "#8a8270" }}>Confirm your password</label>
             <div className="relative mb-4">
               <input
                 type={showPassphrase ? "text" : "password"}
@@ -4418,14 +4428,14 @@ function VaultGate({ onUnlocked }: { onUnlocked: () => void }) {
               className="w-full h-10 rounded-lg text-sm font-medium disabled:opacity-50"
               style={{ background: "#3C3489", color: "#EEEDFE" }}
             >
-              {busy ? "Sealing the vault..." : "Cistern"}
+              {busy ? "Sealing the vault..." : "Create the Vault"}
             </button>
           </>
         )}
 
         {state === "unlock" && !showRecoveryInput && (
           <>
-            <label className="block text-xs mb-1" style={{ color: "#8a8270" }}>whisper the spell</label>
+            <label className="block text-xs mb-1" style={{ color: "#8a8270" }}>Enter your password</label>
             <div className="relative mb-3">
               <input
                 type={showPassphrase ? "text" : "password"}
@@ -4450,21 +4460,21 @@ function VaultGate({ onUnlocked }: { onUnlocked: () => void }) {
               className="w-full h-10 rounded-lg text-sm font-medium disabled:opacity-50 mb-3"
               style={{ background: "#3C3489", color: "#EEEDFE" }}
             >
-              {busy ? "Unsealing..." : "Cistern"}
+              {busy ? "Unlocking..." : "Enter the Vault"}
             </button>
             <button
               onClick={() => setShowRecoveryInput(true)}
               className="w-full text-center text-xs"
               style={{ color: "#7f9977" }}
             >
-              forgot your spell?
+              Forgot your password?
             </button>
           </>
         )}
 
         {showRecoveryInput && (
           <>
-            <label className="block text-xs mb-1" style={{ color: "#8a8270" }}>your ward-key</label>
+            <label className="block text-xs mb-1" style={{ color: "#8a8270" }}>Your recovery key</label>
             <input
               type="text"
               value={recoveryInput}
@@ -4480,14 +4490,14 @@ function VaultGate({ onUnlocked }: { onUnlocked: () => void }) {
               className="w-full h-10 rounded-lg text-sm font-medium disabled:opacity-50 mb-3"
               style={{ background: "#3C3489", color: "#EEEDFE" }}
             >
-              {busy ? "Unsealing..." : "Unseal with ward-key"}
+              {busy ? "Unlocking..." : "Unlock with recovery key"}
             </button>
             <button
               onClick={() => setShowRecoveryInput(false)}
               className="w-full text-center text-xs"
               style={{ color: "#7f9977" }}
             >
-              back to spell
+              Back to password
             </button>
           </>
         )}
@@ -4982,7 +4992,7 @@ function SealedReserve({ onSuccess }: { onSuccess: () => void }) {
       <div>
         <p className="text-xs uppercase tracking-wider" style={{color:'var(--muted)'}}>Sealed reserve</p>
         <p className="text-xs mt-0.5" style={{color:'var(--muted)'}}>
-          Real money, frozen out of your operating balance. Unsealing requires your passphrase — a conscious decision, not a toggle.
+          Real money, frozen out of your operating balance. Unsealing requires your password — a conscious decision, not a toggle.
         </p>
       </div>
 
@@ -5022,7 +5032,7 @@ function SealedReserve({ onSuccess }: { onSuccess: () => void }) {
               {unsealing === r.id ? (
                 <div className="space-y-2">
                   <input type="password" value={unsealPass} onChange={(e) => setUnsealPass(e.target.value)}
-                    placeholder="Confirm your passphrase to unseal"
+                    placeholder="Confirm your password to unseal"
                     className="w-full rounded-lg px-2 py-1.5 text-sm outline-none"
                     style={{background:'var(--bg3)', color:'var(--text)', border:'1px solid var(--border)'}} />
                   <div className="flex gap-2">
@@ -5130,7 +5140,7 @@ function EmergencyFund() {
       <div>
         <p className="text-xs uppercase tracking-wider" style={{color:'var(--muted)'}}>Emergency fund</p>
         <p className="text-xs mt-0.5" style={{color:'var(--muted)'}}>
-          Entirely separate from your regular balance and History. Spending here requires your passphrase.
+          Entirely separate from your regular balance and History. Spending here requires your password.
         </p>
       </div>
 
@@ -5161,7 +5171,7 @@ function EmergencyFund() {
             className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{background:'var(--bg3)', color:'var(--text)', border:'1px solid var(--border)'}} />
           <input type="date" value={spendDate} onChange={(e) => setSpendDate(e.target.value)}
             className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{background:'var(--bg3)', color:'var(--text)', border:'1px solid var(--border)'}} />
-          <input type="password" value={spendPass} onChange={(e) => setSpendPass(e.target.value)} placeholder="Confirm your passphrase"
+          <input type="password" value={spendPass} onChange={(e) => setSpendPass(e.target.value)} placeholder="Confirm your password"
             className="w-full rounded-lg px-3 py-2 text-sm outline-none" style={{background:'var(--bg3)', color:'var(--text)', border:'1px solid var(--border)'}} />
           {msg && <p className={`text-xs ${msg.startsWith("✓") ? "text-green-400" : "text-red-400"}`}>{msg}</p>}
           <div className="flex gap-2">

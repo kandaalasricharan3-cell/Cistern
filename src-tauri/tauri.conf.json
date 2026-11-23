@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "cistern",
+  "productName": "Cistern",
   "version": "0.1.0",
   "identifier": "com.kanda.cistern",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "cistern",
+        "title": "Cistern",
         "width": 800,
         "height": 600
       }

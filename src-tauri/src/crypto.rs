@@ -59,7 +59,7 @@ fn unwrap_key(wrapped: &WrappedKey, secret: &[u8]) -> Result<[u8; KEY_LEN], Stri
     let nonce = Nonce::from_slice(&wrapped.nonce);
     let plaintext = cipher
         .decrypt(nonce, wrapped.ciphertext.as_ref())
-        .map_err(|_| "Incorrect spell — try again, or use your ward-key.".to_string())?;
+        .map_err(|_| "Incorrect password — try again, or use your recovery key.".to_string())?;
     let mut key = [0u8; KEY_LEN];
     key.copy_from_slice(&plaintext);
     Ok(key)
@@ -104,7 +104,7 @@ fn open_encrypted_db(app_data_dir: &Path, db_key: &[u8; KEY_LEN]) -> Result<Conn
     // A real query is the only reliable way to confirm the key was correct —
     // SQLCipher won't error on pragma_update itself with a wrong key.
     conn.query_row("SELECT count(*) FROM sqlite_master", [], |_| Ok(()))
-        .map_err(|_| "Incorrect spell — try again, or use your ward-key.".to_string())?;
+        .map_err(|_| "Incorrect password — try again, or use your recovery key.".to_string())?;
     conn.execute_batch("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;")
         .map_err(|e| e.to_string())?;
     Ok(conn)
@@ -208,7 +208,7 @@ pub fn unlock_with_passphrase(app_data_dir: &Path, passphrase: &str) -> Result<C
     open_encrypted_db(app_data_dir, &db_key)
 }
 
-/// Forgot-passphrase path: ward-key -> unwrap DB key -> open.
+/// Forgot-password path: recovery key -> unwrap DB key -> open.
 pub fn unlock_with_recovery(app_data_dir: &Path, recovery_key: &str) -> Result<Connection, String> {
     let meta = load_meta(app_data_dir)?;
     let recovery_bytes = recovery_key_to_bytes(recovery_key);

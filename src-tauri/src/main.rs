@@ -2627,7 +2627,7 @@ fn get_sealed_reserves(state: State<DbState>) -> Result<Vec<serde_json::Value>, 
 fn unseal_reserve(id: i64, passphrase: String, app: tauri::AppHandle, state: State<DbState>) -> Result<(), String> {
     let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
     crypto::unlock_with_passphrase(&app_data_dir, &passphrase)
-        .map_err(|_| "Incorrect spell — reserve stays sealed.".to_string())?;
+        .map_err(|_| "Incorrect password — reserve stays sealed.".to_string())?;
 
     let guard = state.0.lock().map_err(|e| e.to_string())?;
     let conn = guard.as_ref().ok_or("Vault is locked")?;
@@ -2679,7 +2679,7 @@ fn add_emergency_expense(
 ) -> Result<i64, String> {
     let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
     crypto::unlock_with_passphrase(&app_data_dir, &passphrase)
-        .map_err(|_| "Incorrect spell — emergency fund stays untouched.".to_string())?;
+        .map_err(|_| "Incorrect password — emergency fund stays untouched.".to_string())?;
 
     let guard = state.0.lock().map_err(|e| e.to_string())?;
     let conn = guard.as_ref().ok_or("Vault is locked")?;
