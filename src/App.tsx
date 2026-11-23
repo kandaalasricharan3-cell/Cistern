@@ -4428,7 +4428,7 @@ function VaultGate({ onUnlocked }: { onUnlocked: () => void }) {
               className="w-full h-10 rounded-lg text-sm font-medium disabled:opacity-50"
               style={{ background: "#3C3489", color: "#EEEDFE" }}
             >
-              {busy ? "Sealing the vault..." : "Create the Vault"}
+              {busy ? "Creating your vault..." : "Create the Vault"}
             </button>
           </>
         )}

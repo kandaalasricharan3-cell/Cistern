@@ -212,6 +212,6 @@ pub fn unlock_with_passphrase(app_data_dir: &Path, passphrase: &str) -> Result<C
 pub fn unlock_with_recovery(app_data_dir: &Path, recovery_key: &str) -> Result<Connection, String> {
     let meta = load_meta(app_data_dir)?;
     let recovery_bytes = recovery_key_to_bytes(recovery_key);
-    let db_key = unwrap_key(&meta.recovery, &recovery_bytes)?;
+    let db_key = unwrap_key(&meta.recovery, &recovery_bytes).map_err(|_| "Incorrect recovery key — check it and try again.".to_string())?;
     open_encrypted_db(app_data_dir, &db_key)
 }
