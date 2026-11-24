@@ -52,7 +52,18 @@ On first launch you'll create a passphrase and receive a recovery key. Store it 
 
 ## Screenshots
 
-_Coming soon. Screenshots will use sample data only._
+All screenshots use sample data.
+
+| | |
+|---|---|
+| ![Recovery key](docs/screenshots/recovery-key.png) | ![Home](docs/screenshots/home.png) |
+| **Recovery key on vault creation** | **Home dashboard** |
+| ![History](docs/screenshots/history.png) | ![Floor Radar](docs/screenshots/floor.png) |
+| **Transaction history** | **Floor Radar** |
+| ![Features](docs/screenshots/features.png) | ![Net worth](docs/screenshots/networth.png) |
+| **Features menu** | **Net worth curve** |
+
+![Financial record](docs/screenshots/financial-record.png)
 
 ## Status
 
